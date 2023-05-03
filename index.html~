@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <title>reveal.js</title>
+    
+    <link rel="stylesheet" href="dist/reset.css">
+    <link rel="stylesheet" href="dist/reveal.css">
+    <link rel="stylesheet" href="dist/theme/black.css">
+    
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/monokai.css">
+    <style>
+      .reveal .slides p { text-align: justify; font-size: 0.75em}
+      li { text-align: justify; font-size: 0.75em}
+	  .reveal pre code { font-size: 0.75em; max-height: none}
+    </style>
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+		<section>
+			<h3>Intro to ML and SKLearn</h3>			
+		</section>
+		<section>
+			<h4>Outline</h4>
+			<ul>
+				<li>Definitions</li>
+				<li>Workflow</li>
+				<li>Regression vs Classification</li>
+				<li>Regression as Fitting</li>
+				<li>Generalized Linear Regression</li>
+				<li>sklearn LinearRegression()</li>
+				<li>sklearn MLPRegressor()</li>
+				<li>sklearn Pipeline()</li>
+				<li>Pitfalls</li>
+				<li>Fun Example</li>	    
+			</ul>  
+		</section>
+		<section>
+			<h3>Definitions</h3>
+			<h4>Machine Learning</h4>
+			<p>
+			Machine learning is a sub of statistical and computational techniques to enable machines to learn from data without being explicitly programmed. Algorithms are developed and trained on a set of data to make predictions, classifications, and decisions.	    
+			</p>
+		</section>
+		<section>
+			<h4>Supervised Learning</h4>
+			<p>
+			Training by providing examples of INPUT and OUTPUT
+			</p>
+			<h4>Unsupervised Learning</h4>
+			<p>
+			Primarily clustering, dimensionality reduction, anomaly reduction
+			</p>
+			<h4>Reinforcement Learning</h4>
+			<p>
+			Given and INPUT signal, machine output generates an action that produced a feedback (reward or punishment)
+			</p>
+		</section>
+		<section>
+		<h4>Regression vs Classification</h4>
+
+		<ul>
+		<li>Regression: $ \mathbb{R}^n \rightarrow \mathbb{R}^m $</li>
+		<li>Classification: $ \mathbb{R}^n \rightarrow \{0,1\} $</li>
+		</ul>
+		<div><img src="images/table1.png"/></div>
+		</section>
+
+		<section>
+		<div><img src="images/table2.png"/></div>
+		<ul>
+			<li>$point_i = (\bar x_i, \bar y_i)$</li>
+			<li>$X = \{ x_i \} = X_{train} + X_{test}$</li>
+			<li>$Y = \{ y_i \} = Y_{train} + Y_{test}$</li>
+		</ul>
+		</section>
+
+		<section>
+		<h4>Learning == Fitting</h4>
+		$\bar y_{pred,i} = f(\bar x_i, \bar a) \simeq \bar y_i$
+		<div><img src="images/table3.png"/></div>
+		</section>	
+
+		<section>
+		<h4>Training</h4>
+		<p>Given $X_{train}$, $Y_{train}$, $f$ and a metric function:
+			\[ \sum_i \left| y_i - y_{pred,i}\right|^2  = 
+			\sum_i \left| y_i - f(x_i, \bar a) \right|^2 \]
+			find $\bar a = (a_0, a_1, a_2, ...)$
+			which minimizes the metric.
+		</p>
+		<h4>Testing</h4>
+		<p>Given $X_{test}$, $Y_{test}$, $f$ and $\bar a$ computed in training, evaluate the metric</p>
+		<ul>
+			<li>How good is the prediction?</li>
+			<li>How does prediction depends on training vs testing set?</li>
+		</ul>
+		</section>
+
+		<section>
+			<h4>1D Problem - Linear Regression</h4>
+	
+			\[ y = f(x,\bar a) = a_0 x^0 + a_1 x^1\]
+
+			This is a lie!
+
+		</section>
+
+
+		<section>
+			<h4>1D Problem - Generalized Linear Regression</h4>
+	
+			\[ y = f(x,\bar a) = a_0 f_0(x) + a_1 f_1(x) + a_2 f_2(x) + ... \]
+
+			\[ y = f(x,\bar a) = a_0 x^0 + a_1 x^1 + a_2 x^2 + ... \]
+
+			\[ y = f(x,\bar a) = a_0 sin(x) + a_1 sin(2x) + a_2 sin(3x) + ... \]
+
+			\[ y = f(x,\bar a) = a_0 \frac1{1+e^{-x}} + a_1 exp(x) + a_2 log(x) + ... \]
+
+		</section>
+	
+
+		<section>
+		<h4>1D Problem - Generalized Linear Regression</h4>
+
+		\[ y = f(x,\bar a) = a_0 f_0(x) + a_1 f_1(x) + a_2 f_2(x) + ... \]
+		and $f_j(x)$ <i>a priori</i> known functions then:
+
+		\[
+		X = \left(\begin{matrix}
+		f_0(x_0) & f_1(x_0) & f_2(x_0) & ... \\
+		f_0(x_1) & f_1(x_1) & f_2(x_1) & ... \\
+		f_0(x_2) & f_1(x_2) & f_2(x_2) & ... \\
+		... & ... & ... & ... 
+		\end{matrix}\right),
+		Y = \left(\begin{matrix} y_0 \\ y_1 \\ y_2 \\ ... \end{matrix}\right)
+		\]
+		\[
+		\bar a = (X^T X)^{-1} (X^T Y)
+		\]	  
+		</section>
+
+		<section>
+		<pre><code data-trim data-noescape>
+			from sympy.matrices import Matrix
+
+			x, y = make_data(20)
+
+			class MyRegressor:
+				def __init__(self, funcs):
+					self.funcs = funcs
+					self.js = list(range(len(funcs)))
+				def fit(self, x, y):
+					X = Matrix([[self.funcs[j](xi) for j in self.js] for xi in x])
+					Y = Matrix([y]).T
+					self.a = ((X.T * X).inv() * (X.T * Y)).T
+				def predict(self, x):
+					return sum(self.a[j] * self.funcs[j](x) for j in self.js)
+
+			# choose the functions (polynomials)
+			polys = [(lambda x, i=i: x**i) for i in range(4)]
+
+			model = MyRegressor(polys)
+			model.fit(x, y)
+
+			for i in range(len(x)):
+				print(x[i], y[i], model.predict(x[i]))	      
+		</code></pre>
+		</section>
+	
+		<section>
+			<h4>Fitting polynomial of degree 0,1,2,3</h4>
+			<div><img src="images/linear1.png"/></div>
+		</section>
+
+
+		<section>
+			<pre><code data-trim data-noescape>
+				def sigmoid_maker(d):
+				    return lambda x: 1 / (1 + exp(10*(d-x)))
+							
+				# choose the functions (sigmoids)
+				N = 5
+				funcs = [lambda x: 1] + \
+				        [sigmoid_maker(i/N)
+						 for i in range(1,N)]				
+
+				model = MyRegressor(funcs)
+				model.fit(x,y)
+				y_pred = model.predict(x)
+			</code></pre>
+		</section>		
+
+		<section>
+			<h4>Fitting 1,2,3,4 sygmoids</h4>
+			<div><img src="images/sigmoid1.png"/></div>
+		</section>
+
+		<section>
+		<pre><code data-trim data-noescape>
+			from sklearn.preprocessing import PolynomialFeatures
+			from sklearn.linear_model import LinearRegression
+
+			x, y = make_data(20)
+
+			# transform features
+			poly = PolynomialFeatures(3)
+			X = poly.fit_transform(x)
+
+			model = LinearRegression(fit_intercept=False)
+			model.fit(X,y)
+			y_pred = model.predict(X)
+
+			for i in range(len(x)):
+				print(x[i], y[i], y_pred[i])		
+		</code></pre>
+		</section>
+
+		<section>
+			<h4>Perceptron (simple NN)</h4>
+			<div><img src="images/layers.png"/></div>
+		</section>
+
+		
+		<section>
+			<pre><code data-trim data-noescape>				
+				from sklearn.neural_network import MLPRegressor
+
+				x, y = make_data(20)
+				X = [[1, xi] for xi in x]
+				
+				model = MLPRegressor(hidden_layer_sizes=(10,), 
+										solver="adam", max_iter=2000)
+				model.fit(X, y)
+				y_pred = model.predict(X)
+				
+				for i in range(len(x)):
+					print(x[i], y[i], y_pred[i])	
+			</code></pre>
+		</section>
+
+		<section>
+			<div><img src="images/neural1.png"/></div>
+		</section>
+
+		<section>
+			<h4>The SKLearn Pipeline</h4>
+			<ul>			
+				<li>Given INPUT X and expected OUTPUT Y</li>
+				<li>Fill the blanks (impute)</li>
+				<li>Remove unwanted X columns (PCA)</li>
+				<li>Engineer new X columns</li>
+				<li>Scale X and Y (according to the model needs)</li>
+				<li>Split X, Y in train and test sets</li>
+				<li>MODEL.fit(X_train, Y_train)</li>
+				<li>Y_pred = MODEL.predict(Xtest)</li>
+				<li>compare Y_test vs Y_pred</li>
+				<li>repeat with when train/test are different sets</li>
+				<li>repeat with different MODEL					</li>
+			</ul>
+		</section>
+
+		<section>
+			<pre><code data-trim data-noescape>
+				from sklearn.impute import SimpleImputer
+				from sklearn.decomposition import PCA
+				from sklearn.preprocessing import StandardScaler
+				from sklearn.preprocessing import PolynomialFeatures
+				from sklearn.linear_model import LinearRegression
+				from sklearn.pipeline import Pipeline
+							
+				p = Pipeline([
+					('step 1', SimpleImputer()),
+					('step 2', PCA(n_components=4)),
+					('step 3', StandardScaler()),
+					('step 4', PolynomialFeatures(3)),
+					('step 5', LinearRegression(fit_intercept=False)),
+				])
+				
+				p.fit(X,y)
+				y_pred = p.predict(X)            					
+			</code></pre>
+		</section>
+
+		<section>
+			<h4>Pitfalls</h4>
+			<ul>
+				<li>Not enough data</li>
+				<li>No signal in data</li>
+				<li>Inconsistent data</li>
+				<li>Correlated input data</li>
+				<li>Wrong Model</li>
+				<li>Too few params (underfitting)</li>
+				<li>Too many params (overfitting)</li>				
+			</ul>
+		</section>
+
+			<section>
+				<h4>10000 physics trajectories in 8 dimensions</h4>
+				<div><img src="images/paths.png"/></div>
+				<pre><code data-trim data-noescape>					
+					X[0]: 0.946 0.379 0.828 0.716 0.845 0.224 0.049 0.669 Y[0]: 0
+					X[1]: 0.553 0.709 0.936 0.072 0.585 0.682 0.311 0.322 Y[1]: 1
+					X[2]: 0.202 0.179 0.796 0.678 0.184 0.910 0.512 0.704 Y[2]: 1						
+				</code></pre>
+			</section>
+
+
+			<section>
+				<pre><code data-trim data-noescape>
+					from sklearn.ensemble import RandomForestClassifier
+					from sklearn.pipeline import Pipeline
+					from sklearn.metrics import confusion_matrix, accuracy_score
+
+					# read data
+					with open("hypercube.json") as stream:
+						XY = json.load(stream)
+					n = len(XY)
+					X, Y = [x for x,y in XY], [y for x,y in XY]
+
+					# make pipeline
+					p = Pipeline([
+						('step 1', RandomForestClassifier(n_estimators=30)),
+					])
+
+					X_train, X_test = X[:n//2], X[n//2:]
+					Y_train, Y_test = Y[:n//2], Y[n//2:]
+
+					p.fit(X_train, Y_train)
+					Y_pred = p.predict(X_test)
+
+					print(confusion_matrix(Y_test, Y_pred))
+					print(accuracy_score(Y_test, Y_pred
+				</code></pre>
+			</section>
+
+			<section>
+				<pre><code data-trim data-noescape>
+				confusion matrix =
+
+				[[4066   39    0    0    0]
+				[ 348  385    1    0    0]
+				[   5   84    0    3    0]
+				[   0   39    0   23    0]
+				[   0    0    0    7    0]]
+
+				accuracy = 0.89%
+				</code></pre>
+			</section>
+		</div>
+    </div>
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/math/math.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script>
+      // More info about initialization & config:
+      // - https://revealjs.com/initialization/
+      // - https://revealjs.com/config/
+      Reveal.initialize({
+	  hash: true,
+	  
+	  // Learn about plugins: https://revealjs.com/plugins/
+	  plugins: [ RevealMarkdown, RevealHighlight, RevealNotes, RevealMath.KaTeX]
+      });
+    </script>
+  </body>
+</html>
